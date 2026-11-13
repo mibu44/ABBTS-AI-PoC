@@ -3,6 +3,7 @@ import json
 import os
 from datetime import date, datetime, timedelta
 from typing import Literal
+from uuid import UUID
 from zoneinfo import ZoneInfo
 
 import httpx
@@ -41,6 +42,35 @@ class Passage(BaseModel):
 
 class SearchResult(BaseModel):
     passages: list[Passage]
+
+
+class DigitalOceanChunk(BaseModel):
+    text_content: str
+    metadata: dict = Field(default_factory=dict)
+
+
+class DigitalOceanSearchResult(BaseModel):
+    results: list[DigitalOceanChunk]
+
+
+# Match the upload names to the original public sources shown in Campus Chat.
+KNOWLEDGE_SOURCES = {
+    "abbts-agb.md": ("ABB TS – AGB", "https://www.abbts.ch/rechtliches/agb"),
+    "abbts-englisch.md": ("ABB TS – Kompetenznachweis Englisch", "https://www.abbts.ch/bildungsangebot/kurse/kompetenznachweis-englisch"),
+    "Notebook-Anforderungen_2025.pdf": ("ABB TS – Notebook-Anforderungen", "https://www.abbts.ch/resources/Notebook-Anforderungen_2025.pdf"),
+    "ABB_TS_Studienfuehrer_INFORMATIK_web.pdf": ("ABB TS – Studienführer Informatik", "https://www.abbts.ch/resources/ABB_TS_Studienfuehrer_INFORMATIK_web.pdf"),
+}
+
+
+def digitalocean_passage(chunk: DigitalOceanChunk) -> Passage:
+    item_name = str(chunk.metadata.get("item_name") or "")
+    filename = item_name.rsplit("/", 1)[-1]
+    title, url = next(
+        ((title, url) for name, (title, url) in KNOWLEDGE_SOURCES.items()
+         if filename == name or item_name.rstrip("/") == url.rstrip("/")),
+        (filename, None),
+    )
+    return Passage(text=chunk.text_content, title=title, url=url)
 
 
 class KnowledgeAnswer(BaseModel):
@@ -109,16 +139,31 @@ def answer_timetable(route: Route) -> str:
 
 
 def answer_knowledge(query: str) -> tuple[str, list[dict[str, str]]]:
+    knowledge_base_id = os.getenv("DO_KNOWLEDGE_BASE_ID")
     url = os.getenv("RAG_URL")
-    if not url:
-        return "Cedrics Wissensbasis ist noch nicht verbunden.", []
-    token = os.getenv("RAG_TOKEN")
-    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    if not knowledge_base_id and not url:
+        return "Die Wissensbasis ist noch nicht verbunden.", []
     try:
-        response = httpx.post(url, json={"query": query, "top_k": 5},
-                              headers=headers, timeout=8)
-        response.raise_for_status()
-        passages = SearchResult.model_validate_json(response.content).passages[:5]
+        if knowledge_base_id:
+            token = os.getenv("DO_KNOWLEDGE_BASE_TOKEN")
+            if not token:
+                return "Die Wissensbasis ist noch nicht vollständig konfiguriert.", []
+            url = f"https://kbaas.do-ai.run/v1/{UUID(knowledge_base_id)}/retrieve"
+            response = httpx.post(
+                url, json={"query": query, "num_results": 5, "alpha": 0.5},
+                headers={"Authorization": f"Bearer {token}"}, timeout=8,
+            )
+            response.raise_for_status()
+            result = DigitalOceanSearchResult.model_validate_json(response.content)
+            passages = [digitalocean_passage(chunk) for chunk in result.results[:5]]
+        else:
+            token = os.getenv("RAG_TOKEN")
+            headers = {"Authorization": f"Bearer {token}"} if token else {}
+            response = httpx.post(
+                url, json={"query": query, "top_k": 5}, headers=headers, timeout=8,
+            )
+            response.raise_for_status()
+            passages = SearchResult.model_validate_json(response.content).passages[:5]
     except (httpx.HTTPError, ValueError):
         return "Die Wissensbasis konnte gerade nicht abgefragt werden.", []
     if not passages:

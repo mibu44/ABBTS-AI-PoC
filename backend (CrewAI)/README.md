@@ -40,22 +40,31 @@ Mit dem aktuellen Stundenplan sind sechs Lektionen in Raum 2D06 zu erwarten.
 Für die Browser-Anbindung die Campus-Chat-Route `/api/chat` zum Backend
 weiterleiten und im Frontend `demo: false` setzen.
 
-## Cedrics RAG anbinden
+## DigitalOcean Knowledge Base anbinden
 
-Die tatsächliche Schnittstelle steht noch aus. Der Adapter in
-`answer_knowledge` erwartet die vollständige Such-URL in `RAG_URL`
-und unterstützt optional einen Bearer-Token über `RAG_TOKEN`.
-Die Anfrage ist ein HTTP POST mit `{"query":"...","top_k":5}`.
-Die erwartete Antwort sieht so aus:
+1. In DigitalOcean eine Knowledge Base erstellen und OpenSearch-Kosten prüfen.
+2. Die vier Quellen gemäss Tabelle hochladen und warten, bis die Indexierung abgeschlossen ist.
+3. Die UUID der Knowledge Base als `DO_KNOWLEDGE_BASE_ID` setzen. Einen DigitalOcean API-Token mit `GenAI:read` als `DO_KNOWLEDGE_BASE_TOKEN` setzen. Lokal kommen die Werte in `.env`, im Kubernetes-Deployment wird der Token aus einem Secret als Umgebungsvariable eingebunden.
+4. Das Backend mit den neuen Einstellungen starten. Cedrics Testfragen über `POST /api/chat` oder die Web-UI stellen und die Quellenlinks prüfen.
 
-```json
-{
-  "passages": [
-    {"text": "Relevanter Auszug", "title": "Quellentitel", "url": "https://example.org/quelle"}
-  ]
-}
-```
+| Upload-Dateiname | Originalquelle |
+| --- | --- |
+| `abbts-agb.md` | [ABB TS – AGB](https://www.abbts.ch/rechtliches/agb) |
+| `abbts-englisch.md` | [ABB TS – Kompetenznachweis Englisch](https://www.abbts.ch/bildungsangebot/kurse/kompetenznachweis-englisch) |
+| `Notebook-Anforderungen_2025.pdf` | [ABB TS – Notebook-Anforderungen](https://www.abbts.ch/resources/Notebook-Anforderungen_2025.pdf) |
+| `ABB_TS_Studienfuehrer_INFORMATIK_web.pdf` | [ABB TS – Studienführer Informatik](https://www.abbts.ch/resources/ABB_TS_Studienfuehrer_INFORMATIK_web.pdf) |
 
-Nur `text` ist pro Stelle Pflicht. Wenn Cedrics API ein anderes Format
-verwendet, wird der Adapter an die tatsächliche Anfrage und Antwort
-angepasst. Ohne `RAG_URL` bleiben Stundenplanabfragen verfügbar.
+Für die zwei Markdown-Dateien die relevanten Abschnitte der Webseiten übernehmen. Die PDFs unter ihren Originalnamen hochladen. Diese Dateinamen erlauben dem Backend, Treffer aus der Upload-Suche den öffentlichen Original-Links zuzuordnen.
+
+Die DigitalOcean-Suche hat Vorrang, wenn `DO_KNOWLEDGE_BASE_ID` gesetzt ist. Für andere Suchdienste bleibt `RAG_URL` mit optionalem `RAG_TOKEN` verfügbar. Diese Schnittstelle nimmt `{"query":"...","top_k":5}` entgegen und liefert `{"passages":[{"text":"...","title":"...","url":"https://example.org/"}]}`. Ohne RAG-Konfiguration stehen die Stundenplanabfragen weiterhin zur Verfügung.
+
+### Abnahmetests
+
+- Wie werden mir die Kosten während meines Studiums in Rechnung gestellt? Und was ist, wenn ich ein Studienjahr wiederholen müsste? [ABB TS – AGB](https://www.abbts.ch/rechtliches/agb)
+- Wie kann ich meine Englischkenntnisse nachweisen, um mein Diplom zu erhalten, und bis wann muss ich dies tun? [ABB TS – Kompetenznachweis Englisch](https://www.abbts.ch/bildungsangebot/kurse/kompetenznachweis-englisch)
+- Ich bin am Ende meines ersten Studienjahres und muss mir einen neuen Computer kaufen. Was muss ich dabei beachten? [ABB TS – Notebook-Anforderungen](https://www.abbts.ch/resources/Notebook-Anforderungen_2025.pdf)
+- Ich habe den Arbeitgeber gewechselt. Muss ich die Schule darüber informieren? [ABB TS – Studienführer Informatik](https://www.abbts.ch/resources/ABB_TS_Studienfuehrer_INFORMATIK_web.pdf)
+
+Bei mehrteiligen Fragen prüfen, ob jede Teilantwort belegt ist. Bei fehlender Textgrundlage soll der Agent die Lücke benennen. Im Frontend müssen verfügbare Links zur Originalquelle führen.
+
+[DigitalOcean-Dokumentation zur Retrieval API](https://docs.digitalocean.com/products/inference/how-to/create-manage-agent-knowledge-bases/#retrieve-data-from-a-knowledge-base-using-the-knowledge-base-api)
