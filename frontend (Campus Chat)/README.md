@@ -4,17 +4,17 @@ Responsive, buildfreie Chatoberfläche mit lokalem Gesprächsverlauf. Das Logo i
 
 ## Lokal starten
 
-Im Ordner `frontend` ausführen.
+Im Ordner `frontend (Campus Chat)` ausführen.
 
 `docker build -t abbts-chat:1.0 .`
 
 `docker run --rm -p 8081:80 abbts-chat:1.0`
 
-Danach http://localhost:8081 öffnen. Alternativ dist über einen statischen Webserver bereitstellen.
+Danach http://localhost:8081 öffnen. Alternativ `dist (Web UI)` über einen statischen Webserver bereitstellen.
 
 ## Coordinator anbinden
 
-In dist/config.js oder der Kubernetes ConfigMap demo auf false setzen und endpoint konfigurieren. Der vorgeschlagene Vertrag verwendet POST /api/chat mit JSON.
+In `dist (Web UI)/config.js` oder der Kubernetes ConfigMap demo auf false setzen und endpoint konfigurieren. Der vorgeschlagene Vertrag verwendet POST /api/chat mit JSON.
 
 ```json
 {"conversation_id":"uuid","messages":[{"role":"user","content":"Wann ist Unterricht?"}]}
@@ -26,7 +26,7 @@ Erwartete Antwort
 {"answer":"Antwort des Coordinators","sources":[{"title":"Quellentitel","url":"https://www.abbts.ch/"}]}
 ```
 
-Das [CrewAI-Backend](../backend/README.md) ordnet Anfragen dem Stundenplan-MCP, der RAG-Wissensbasis oder beiden zu. API-Schlüssel gehören ausschliesslich ins Backend. Die Oberfläche zeigt Antworttext und Quellen. Authentifizierung, persönlicher Klassenzugriff und Streaming sind noch nicht implementiert. Demoantworten enthalten keine echten Stundenplandaten. Gespräche bleiben lokal im Browser gespeichert und können gelöscht werden.
+Das [CrewAI-Backend](../backend%20%28CrewAI%29/README.md) ordnet Anfragen dem Stundenplan-MCP, der RAG-Wissensbasis oder beiden zu. API-Schlüssel gehören ausschliesslich ins Backend. Die Oberfläche zeigt Antworttext und Quellen. Authentifizierung, persönlicher Klassenzugriff und Streaming sind noch nicht implementiert. Demoantworten enthalten keine echten Stundenplandaten. Gespräche bleiben lokal im Browser gespeichert und können gelöscht werden.
 
 ## Kubernetes
 

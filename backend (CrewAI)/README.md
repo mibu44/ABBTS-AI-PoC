@@ -14,7 +14,7 @@ Dieses Backend nimmt Chatnachrichten unter `POST /api/chat` entgegen.
 ## Lokal starten
 
 Voraussetzungen sind Python 3.12, ein laufender Stundenplan-MCP und Zugang
-zum konfigurierten Sprachmodell. Im Ordner `backend`:
+zum konfigurierten Sprachmodell. Im Ordner `backend (CrewAI)`:
 
 ```powershell
 Copy-Item .env.example .env
