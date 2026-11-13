@@ -1,0 +1,7 @@
+crewai==1.15.0
+fastapi>=0.115,<1
+httpx>=0.27,<1
+mcp>=1.26,<2
+python-dotenv>=1,<2
+tzdata>=2025.2
+uvicorn>=0.34,<1
