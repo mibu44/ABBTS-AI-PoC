@@ -8,6 +8,16 @@ KI-gestützter Campus Chat der Gruppe 1 Systemtechnik für die Semesterarbeit SA
 | [Backend](backend/README.md) | CrewAI verarbeitet Anfragen unter `POST /api/chat` und nutzt je nach Frage den Stundenplan-MCP oder Cedrics RAG-Wissensbasis. |
 | [Stundenplan-MCP](mcp-stundenplan/README.md) | Stellt die Unterrichtstermine über das Tool `stundenplan_abfragen` bereit. |
 
+## Ordnerstruktur
+
+```text
+ABBTS-AI-PoC/
+├── frontend/          (Campus-Chat-Frontend)
+│   └── dist/         (Web-UI mit HTML, CSS und JavaScript)
+├── backend/           (CrewAI und Chat-API)
+└── mcp-stundenplan/    (MCP-Server und Stundenplandaten)
+```
+
 ## Lokal starten
 
 1. Den [Stundenplan-MCP](mcp-stundenplan/README.md) mit Docker auf Port 8080 starten.
