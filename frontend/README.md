@@ -2,13 +2,15 @@
 
 Responsive, buildfreie Chatoberfläche mit lokalem Gesprächsverlauf. Das Logo ist als Wortmarke anhand der Vorlage nachgebildet. Ein offizielles Logo kann später eingesetzt werden.
 
-## Start
+## Lokal starten
+
+Im Ordner `frontend` ausführen.
 
 `docker build -t abbts-chat:1.0 .`
 
-`docker run --rm -p 8080:80 abbts-chat:1.0`
+`docker run --rm -p 8081:80 abbts-chat:1.0`
 
-Danach http://localhost:8080 öffnen. Alternativ dist über einen statischen Webserver bereitstellen.
+Danach http://localhost:8081 öffnen. Alternativ dist über einen statischen Webserver bereitstellen.
 
 ## Coordinator anbinden
 
@@ -24,10 +26,10 @@ Erwartete Antwort
 {"answer":"Antwort des Coordinators","sources":[{"title":"Quellentitel","url":"https://www.abbts.ch/"}]}
 ```
 
-Der Coordinator übernimmt das Routing zu den zwei CrewAI-Agenten und den Zugriff auf RAG. API-Schlüssel gehören ausschliesslich ins Backend. Die Oberfläche zeigt Antworttext und Quellen. Authentifizierung, persönlicher Klassenzugriff und Streaming sind noch nicht implementiert. Demoantworten enthalten keine echten Stundenplandaten. Gespräche bleiben lokal im Browser gespeichert und können gelöscht werden.
+Das [CrewAI-Backend](../backend/README.md) ordnet Anfragen dem Stundenplan-MCP, der RAG-Wissensbasis oder beiden zu. API-Schlüssel gehören ausschliesslich ins Backend. Die Oberfläche zeigt Antworttext und Quellen. Authentifizierung, persönlicher Klassenzugriff und Streaming sind noch nicht implementiert. Demoantworten enthalten keine echten Stundenplandaten. Gespräche bleiben lokal im Browser gespeichert und können gelöscht werden.
 
 ## Kubernetes
 
-Image in eure Registry pushen und image im Deployment entsprechend ersetzen. kubectl apply -f kubernetes.yaml erstellt Deployment, ConfigMap und Service. Für einen lokalen Test kubectl port-forward service/abbts-chat 8080:80 verwenden.
+Image in eure Registry pushen und image im Deployment entsprechend ersetzen. kubectl apply -f kubernetes.yaml erstellt Deployment, ConfigMap und Service. Für einen lokalen Test kubectl port-forward service/abbts-chat 8081:80 verwenden.
 
 Euer Ingress muss / zum Frontend und /api/chat zum Coordinator routen. Alternativ eine vollständige API-URL konfigurieren und CORS am Backend passend setzen. Nach ConfigMap-Änderungen kubectl rollout restart deployment/abbts-chat ausführen, da subPath-Mounts einen Neustart benötigen. Das Manifest ist eine Ausgangskonfiguration für euren Cluster. Der Clusterbetrieb und die Backendanbindung müssen mit eurer Infrastruktur geprüft werden.
