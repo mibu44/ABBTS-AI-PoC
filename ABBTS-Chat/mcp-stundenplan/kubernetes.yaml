@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stundenplan-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stundenplan-mcp
+  template:
+    metadata:
+      labels:
+        app: stundenplan-mcp
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mcp
+          image: stundenplan-mcp:1.0.0
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          volumeMounts:
+            - name: stundenplan
+              mountPath: /app/data
+              readOnly: true
+      volumes:
+        - name: stundenplan
+          configMap:
+            name: stundenplan-mcp-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stundenplan-mcp
+spec:
+  type: ClusterIP
+  selector:
+    app: stundenplan-mcp
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
