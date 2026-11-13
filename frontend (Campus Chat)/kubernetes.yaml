@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: abbts-chat:1.0
+          image: abbts-chat:1.1
           ports:
             - containerPort: 80
           resources:
@@ -47,7 +47,7 @@ metadata:
   name: abbts-chat-config
 data:
   config.js: |
-    window.CHAT_CONFIG = { endpoint: '/api/chat', demo: true };
+    window.CHAT_CONFIG = { endpoint: '/api/chat', demo: false };
 ---
 apiVersion: v1
 kind: Service

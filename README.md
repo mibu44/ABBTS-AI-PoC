@@ -22,6 +22,6 @@ ABBTS-AI-PoC/
 
 1. Den [Stundenplan-MCP](mcp-stundenplan%20%28Stundenplan-MCP%29/README.md) mit Docker auf Port 8080 starten.
 2. Das [Backend](backend%20%28CrewAI%29/README.md) mit Modellzugang konfigurieren und auf Port 8000 starten. Cedrics Suchschnittstelle muss für allgemeine Schulfragen eingerichtet sein.
-3. Das [Frontend](frontend%20%28Campus%20Chat%29/README.md) auf Port 8081 starten. Für den integrierten Betrieb `/api/chat` zum Backend weiterleiten und den Demo-Modus deaktivieren.
+3. Das [Frontend](frontend%20%28Campus%20Chat%29/README.md) auf Port 8081 starten. Im Minikube-Manifest ist der Live-Modus aktiv. Nginx leitet `/api/chat` an den internen Backend-Service weiter.
 
 Dockerfiles und Kubernetes-Manifeste liegen bei den Komponenten, für die sie gelten.

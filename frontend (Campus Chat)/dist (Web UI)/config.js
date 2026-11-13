@@ -1,1 +1,1 @@
-window.CHAT_CONFIG = { endpoint: '', demo: true };
+window.CHAT_CONFIG = { endpoint: '/api/chat', demo: false };
