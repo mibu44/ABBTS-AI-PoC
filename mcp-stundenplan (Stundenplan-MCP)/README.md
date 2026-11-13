@@ -32,7 +32,7 @@ meldet das Tool einen Fehler.
 
 ## Lokal mit Docker starten
 
-Im Ordner `ABBTS-Chat/mcp-stundenplan` mit laufendem Docker ausführen:
+Im Ordner `mcp-stundenplan (Stundenplan-MCP)` mit laufendem Docker ausführen:
 
 ```powershell
 docker build -t stundenplan-mcp:1.0.0 .
