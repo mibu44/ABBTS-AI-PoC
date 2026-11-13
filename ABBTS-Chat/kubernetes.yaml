@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abbts-chat
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: abbts-chat
+  template:
+    metadata:
+      labels:
+        app: abbts-chat
+    spec:
+      containers:
+        - name: frontend
+          image: abbts-chat:1.0
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/nginx/html/config.js
+              subPath: config.js
+      volumes:
+        - name: config
+          configMap:
+            name: abbts-chat-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: abbts-chat-config
+data:
+  config.js: |
+    window.CHAT_CONFIG = { endpoint: '/api/chat', demo: true };
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: abbts-chat
+spec:
+  selector:
+    app: abbts-chat
+  ports:
+    - port: 80
+      targetPort: 80
