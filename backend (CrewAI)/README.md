@@ -23,10 +23,19 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m uvicorn app:app --env-file .env --host 127.0.0.1 --port 8000
 ```
 
-Vor dem Start den Modellzugang in `.env` eintragen. Die mitgelieferte
-Konfiguration ist für OpenAI vorbereitet. Lokaler MCP-Standard ist
-`http://127.0.0.1:8080/mcp`. Im selben Kubernetes-Namespace lautet die
-URL `http://stundenplan-mcp:8080/mcp`.
+Vor dem Start `GEMINI_API_KEY` in der lokalen `.env` eintragen. Die Vorlage verwendet
+`CAMPUS_MODEL=gemini/gemini-3.5-flash-lite` als Beispiel für die Gemini Developer API.
+Falls euer Google-Projekt ein anderes Modell verwendet, dessen Modell-ID mit dem
+Präfix `gemini/` eintragen. Für OpenAI `CAMPUS_MODEL=openai/gpt-4o-mini` und
+`OPENAI_API_KEY` setzen.
+
+Der lokale MCP-Standard ist `http://127.0.0.1:8080/mcp`. Im selben
+Kubernetes-Namespace lautet die URL `http://stundenplan-mcp:8080/mcp`.
+
+Für Kubernetes zuerst das Backend-Image neu bauen, damit es die Gemini-Bibliothek
+enthält. `CAMPUS_MODEL` und `GEMINI_API_KEY` gehören ins bestehende Kubernetes-Secret
+`abbts-chat-backend`. Nach der Aktualisierung des Secrets und des Images das
+Backend neu ausrollen, damit es die neuen Umgebungsvariablen übernimmt.
 
 ```powershell
 $body = @{
